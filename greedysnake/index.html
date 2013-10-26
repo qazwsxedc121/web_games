@@ -5,7 +5,6 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
     <script src="http://cdn.staticfile.org/jquery/2.0.3/jquery.min.js"></script>
     <script src="http://cdn.staticfile.org/jquery-cookie/1.3.1/jquery.cookie.min.js"></script>
-    <script src="main.js"></script>
     <script>
         var keycode = {
             ENTER : 13,
@@ -62,19 +61,14 @@
                 if(state == "eat"){
                 	snake.eat();
                 }
-                if(p[0] > 39){
-                    p[0] = 0;
+                if(p[0] > 39 || p[0] < 0 || p[1] > 29 || p[1] < 0){
+                    return "die";
                 }
-                if(p[0] < 0){
-                    p[0] = 39;
+                for(var _i = 0; _i < snake.l.length; _i += 1){
+                    if(p[0] == snake.l[_i][0] && p[1] == snake.l[_i][1]){
+                        return "die";
+                    }
                 }
-                if(p[1] > 29){
-                    p[1] = 0;
-                }
-                if(p[1] < 0){
-                    p[1] = 29;
-                }
-                
                 snake.l.shift();
                 snake.l.push([p[0],p[1]]);
                 return state;
@@ -129,17 +123,15 @@
         function init() {
             // code here.
             var stage = new createjs.Stage("demoCanvas");
-            var left = 100;
+            var left = 10;
             var bgcontainer = new createjs.Container();
-            var text = new createjs.Text(left+" LEFT","bold 86px Helvetica","#666");
-            text.x = 400;
+            var text = new createjs.Text(left+" LEFT","bold 86px Helvetica","#444");
+            text.x = 300;
             text.y = 300;
             bgcontainer.addChild(text);
             document.onkeydown = handleKeyDown;
             document.onkeyup = handleKeyUp;
-            var background = new createjs.Shape();
-            var graphics1 = new createjs.Graphics().beginFill("#999").drawRect(2,2,17,17);
-            var graphics2 = new createjs.Graphics().beginFill("#AAA").drawRect(0,0,20,20);
+            var graphics2 = new createjs.Graphics().beginFill("#BBB").drawRect(0,0,20,20);
             var batsquare = new createjs.Shape(graphics2);
             var bat = [10,14];
             var squarel = [];
@@ -161,23 +153,10 @@
                 }
                 return false;
             };
-            var testsnake1 = function(b){
-                if(b[0] >= 3  && b[0] <= 8 && b[1] >=5 && b[1] <= 7){
-                    createjs.Ticker.setPaused(true);
-                    return "blog";
-                }
-                return false;
-            };
 	        function tick(event) {
-                if(createjs.Ticker.getPaused()){
-                    stage.update(event);
-                    return;
-                }
                 snake.trun(snaked);
-                if(left <= 0){
-                    var flag = snake.go(testsnake1);
-                    text.text = "\\(^_^)\/";
-                }else if(snake.go(testsnake)){
+                var forward = snake.go(testsnake);
+                if(forward === "eat"){
                 	bat = [randint(40),randint(30)];
                 	batsquare.x = bat[0] * 20;
                 	batsquare.y = bat[1] * 20;
@@ -185,11 +164,16 @@
                         text.text = "\\(^_^)\/";
                         left = 0;
                         batsquare.visible = false;
-                        qaztext.visible = false;
+                        createjs.Ticker.reset();
                     }else{
                         left -= 1;
                         text.text = left + " LEFT";
                     }
+                }else if(forward === "die"){
+                    text.text = "(X_X)";
+                    stage.update(event);
+                    setTimeout("location.reload()",1000);
+                    createjs.Ticker.reset();
                 }
             	if(snake.l.length > squarel.length){
             		var sq = new createjs.Shape(graphics2);
