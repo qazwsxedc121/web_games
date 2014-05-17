@@ -1,210 +1,202 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="http://code.createjs.com/createjs-2013.09.25.min.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
-    <script src="http://cdn.staticfile.org/jquery/2.0.3/jquery.min.js"></script>
-    <script src="http://cdn.staticfile.org/jquery-cookie/1.3.1/jquery.cookie.min.js"></script>
-    <script>
-        var keycode = {
-            ENTER : 13,
-            SPACE : 32,    
-            UP : 38,      
-            LEFT : 37,   
-            RIGHT : 39, 
-            DOWN : 40,
-            W : 87,    
-            A : 65,   
-            D : 68,  
-            S : 83,
+  <script src="http://code.createjs.com/createjs-2013.09.25.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/2.0.3/jquery.min.js"></script>
+  <script src="http://cdn.staticfile.org/jquery-cookie/1.3.1/jquery.cookie.min.js"></script>
+  <script>
+    var keycode = {
+      ENTER : 13,
+      SPACE : 32,
+      UP : 38,
+      LEFT : 37,
+      RIGHT : 39,
+      DOWN : 40,
+      W : 87,
+      A : 65,
+      D : 68,
+      S : 83,
+    }
+    function randint(n) {
+      x = Math.random();
+      return Math.floor(x * n);
+    }
+    function Snake() {
+      var snake = {};
+      snake.l = [[0,0],[0,0],[0,0],[0,0]];
+      snake.d = 3;
+      snake.trun = function(direction){
+        switch(direction){
+          case 0:
+            if(snake.d == 2 || snake.d == 3) snake.d = direction; break;
+          case 1:
+            if(snake.d == 2 || snake.d == 3) snake.d = direction; break;
+          case 2:
+            if(snake.d == 1 || snake.d == 0) snake.d = direction; break;
+          case 3:
+            if(snake.d == 1 || snake.d == 0) snake.d = direction; break;
         }
-        function randint(n) {
-        	x = Math.random();
-        	return Math.floor(x * n);
+      }
+      snake.eat = function (){
+        snake.l.unshift([0,0]);
+      }
+      snake.go = function (bat){
+        var p = snake.l[snake.l.length - 1].slice(0);
+        switch(snake.d){
+          case 0: p[1] -= 1; break;
+          case 1: p[1] += 1; break;
+          case 2: p[0] -= 1; break;
+          case 3: p[0] += 1; break;
         }
-        function Snake() {
-            var snake = {};
-            snake.l = [[0,0],[0,0],[0,0],[0,0]];
-            snake.d = 3;
-            snake.trun = function(direction){
-                switch(direction){
-                    case 0:
-                        if(snake.d == 2 || snake.d == 3) snake.d = direction; break;
-                    case 1:
-                        if(snake.d == 2 || snake.d == 3) snake.d = direction; break;
-                    case 2:
-                        if(snake.d == 1 || snake.d == 0) snake.d = direction; break;
-                    case 3:
-                        if(snake.d == 1 || snake.d == 0) snake.d = direction; break;
-                }
-            }
-            snake.eat = function (){
-                snake.l.unshift([0,0]);
-            }
-            snake.go = function (bat){
-                var p = snake.l[snake.l.length - 1].slice(0);
-                switch(snake.d){
-                    case 0:
-                        p[1] -= 1;
-                        break;
-                    case 1:
-                        p[1] += 1;
-                        break;
-                    case 2:
-                        p[0] -= 1;
-                        break;
-                    case 3:
-                        p[0] += 1;
-                        break;
-                }
-                var state = bat(p);
-                if(state == "eat"){
-                	snake.eat();
-                }
-                if(p[0] > 39 || p[0] < 0 || p[1] > 29 || p[1] < 0){
-                    return "die";
-                }
-                for(var _i = 0; _i < snake.l.length; _i += 1){
-                    if(p[0] == snake.l[_i][0] && p[1] == snake.l[_i][1]){
-                        return "die";
-                    }
-                }
-                snake.l.shift();
-                snake.l.push([p[0],p[1]]);
-                return state;
-            }
-            return snake;
+        var state = bat(p);
+        if(state == "eat"){
+          snake.eat();
         }
+        if(p[0] > 39 || p[0] < 0 || p[1] > 29 || p[1] < 0){
+          return "die";
+        }
+        for(var _i = 0; _i < snake.l.length; _i += 1){
+          if(p[0] == snake.l[_i][0] && p[1] == snake.l[_i][1]){
+            return "die";
+          }
+        }
+        snake.l.shift();
+        snake.l.push([p[0],p[1]]);
+        return state;
+      }
+      return snake;
+    }
 
-        var Held_state = ["u","d","l","r"];
-        var held_state_table = function(l){
-            var _i,table = {};
-            for(_i = 0; _i < l.length; _i += 1){
-                table[l[_i]] = false;
-            }
-            return table;
-        }(Held_state);
-        var key_state = {
-            u: ["UP","W"],
-            d: ["DOWN","S"],
-            l: ["LEFT","A"],
-            r: ["RIGHT","D"],
+    var Held_state = ["u","d","l","r"];
+    var held_state_table = function(l){
+      var _i,table = {};
+      for(_i = 0; _i < l.length; _i += 1){
+        table[l[_i]] = false;
+      }
+      return table;
+    }(Held_state);
+    var key_state = {
+      u: ["UP","W"],
+      d: ["DOWN","S"],
+      l: ["LEFT","A"],
+      r: ["RIGHT","D"],
+    }
+    var snaked_state = {u:0,d:1,l:2,r:3,};
+    var state = "r";
+    var snaked = 3;
+    function handleKeyDown(e) {
+      if(!e){ var e = window.event; }
+      var _i,_j;
+      Outer: for(_i = 0; _i < Held_state.length; _i += 1){
+        var state = Held_state[_i];
+        for(_j = 0; _j < key_state[state].length; _j += 1){
+          if(e.keyCode === keycode[key_state[Held_state[_i]][_j]]){
+            snaked = snaked_state[state];
+            held_state_table[state] = true;
+            break Outer;
+          }
         }
-        var snaked_state = {u:0,d:1,l:2,r:3,};
-        var state = "r";
-        var snaked = 3;
-        function handleKeyDown(e) {
-            if(!e){ var e = window.event; }
-            var _i,_j;
-            Outer: for(_i = 0; _i < Held_state.length; _i += 1){
-                var state = Held_state[_i];
-                for(_j = 0; _j < key_state[state].length; _j += 1){
-                    if(e.keyCode === keycode[key_state[Held_state[_i]][_j]]){
-                        snaked = snaked_state[state];
-                        held_state_table[state] = true;
-                        break Outer;
-                    }
-                }
-            }
+      }
+    }
+    function handleKeyUp(e) {
+      if(!e){ var e = window.event; }
+      var _i,_j;
+      Outer: for(_i = 0; _i < Held_state.length; _i += 1){
+        var state = Held_state[_i];
+        for(_j = 0; _j < key_state[state].length; _j += 1){
+          if(e.keyCode === keycode[key_state[Held_state[_i]][_j]]){
+            held_state_table[state] = false;
+            break Outer;
+          }
         }
-        function handleKeyUp(e) {
-            if(!e){ var e = window.event; }
-            var _i,_j;
-            Outer: for(_i = 0; _i < Held_state.length; _i += 1){
-                var state = Held_state[_i];
-                for(_j = 0; _j < key_state[state].length; _j += 1){
-                    if(e.keyCode === keycode[key_state[Held_state[_i]][_j]]){
-                        held_state_table[state] = false;
-                        break Outer;
-                    }
-                }
-            }
+      }
+    }
+    function init() {
+      // code here.
+      var stage = new createjs.Stage("demoCanvas");
+      var left = 10;
+      var bgcontainer = new createjs.Container();
+      var text = new createjs.Text(left+" LEFT","bold 86px Helvetica","#444");
+      text.x = 300;
+      text.y = 300;
+      bgcontainer.addChild(text);
+      document.onkeydown = handleKeyDown;
+      document.onkeyup = handleKeyUp;
+      var graphics2 = new createjs.Graphics().beginFill("#BBB").drawRect(0,0,20,20);
+      var batsquare = new createjs.Shape(graphics2);
+      var bat = [10,14];
+      var squarel = [];
+      var snake = new Snake();
+      for (var i = 0; i < snake.l.length; i++) {
+        var sq = new createjs.Shape(graphics2);
+        squarel.push(sq);
+        stage.addChild(sq);
+      };
+      batsquare.x = bat[0] * 20;
+      batsquare.y = bat[1] * 20;
+      stage.addChild(batsquare);
+      stage.addChildAt(bgcontainer,0);
+      stage.update();
+      var count = 200;
+      var testsnake = function(b){
+        if(b[0] == bat[0] && b[1] == bat[1]){
+          return "eat";
         }
-        function init() {
-            // code here.
-            var stage = new createjs.Stage("demoCanvas");
-            var left = 10;
-            var bgcontainer = new createjs.Container();
-            var text = new createjs.Text(left+" LEFT","bold 86px Helvetica","#444");
-            text.x = 300;
-            text.y = 300;
-            bgcontainer.addChild(text);
-            document.onkeydown = handleKeyDown;
-            document.onkeyup = handleKeyUp;
-            var graphics2 = new createjs.Graphics().beginFill("#BBB").drawRect(0,0,20,20);
-            var batsquare = new createjs.Shape(graphics2);
-            var bat = [10,14];
-            var squarel = [];
-            var snake = new Snake();
-            for (var i = 0; i < snake.l.length; i++) {
-                var sq = new createjs.Shape(graphics2);
-                squarel.push(sq);
-                stage.addChild(sq);
-            };
-            batsquare.x = bat[0] * 20;
-            batsquare.y = bat[1] * 20;
-            stage.addChild(batsquare);
-            stage.addChildAt(bgcontainer,0);
-            stage.update();
-            var count = 200;
-            var testsnake = function(b){
-                if(b[0] == bat[0] && b[1] == bat[1]){
-                    return "eat";
-                }
-                return false;
-            };
-	        function tick(event) {
-                snake.trun(snaked);
-                var forward = snake.go(testsnake);
-                if(forward === "eat"){
-                	bat = [randint(40),randint(30)];
-                	batsquare.x = bat[0] * 20;
-                	batsquare.y = bat[1] * 20;
-                    if(left == 1){
-                        text.text = "\\(^_^)\/";
-                        left = 0;
-                        batsquare.visible = false;
-                        createjs.Ticker.reset();
-                    }else{
-                        left -= 1;
-                        text.text = left + " LEFT";
-                    }
-                }else if(forward === "die"){
-                    text.text = "(X_X)";
-                    stage.update(event);
-                    setTimeout("location.reload()",1000);
-                    createjs.Ticker.reset();
-                }
-            	if(snake.l.length > squarel.length){
-            		var sq = new createjs.Shape(graphics2);
-            		squarel.push(sq);
-            		stage.addChild(sq);
-            	}
-                for (var i = snake.l.length - 1; i >= 0; i--) {
-                    squarel[i].x = snake.l[i][0] * 20;
-                    squarel[i].y = snake.l[i][1] * 20;
-                };
-	        	stage.update(event);
-	        }
-            createjs.Ticker.setFPS(10);
-            createjs.Ticker.addEventListener("tick",tick);
+        return false;
+      };
+      function tick(event) {
+        snake.trun(snaked);
+        var forward = snake.go(testsnake);
+        if(forward === "eat"){
+          bat = [randint(40),randint(30)];
+          batsquare.x = bat[0] * 20;
+          batsquare.y = bat[1] * 20;
+          if(left == 1){
+            text.text = "\\(^_^)\/";
+            left = 0;
+            batsquare.visible = false;
+            createjs.Ticker.reset();
+          }else{
+            left -= 1;
+            text.text = left + " LEFT";
+          }
+        }else if(forward === "die"){
+          text.text = "(X_X)";
+          stage.update(event);
+          setTimeout("location.reload()",1000);
+          createjs.Ticker.reset();
         }
-    </script>
+        if(snake.l.length > squarel.length){
+          var sq = new createjs.Shape(graphics2);
+          squarel.push(sq);
+          stage.addChild(sq);
+        }
+        for (var i = snake.l.length - 1; i >= 0; i--) {
+          squarel[i].x = snake.l[i][0] * 20;
+          squarel[i].y = snake.l[i][1] * 20;
+        };
+        stage.update(event);
+      }
+      createjs.Ticker.setFPS(10);
+      createjs.Ticker.addEventListener("tick",tick);
+    }
+  </script>
 </head>
 <body onLoad="init();">
-    <style type="text/css">
-    #demoCanvas {
-        background-color: #333;
-    }
+<style type="text/css">
+  #demoCanvas {
+    background-color: #333;
+  }
 
-    #canvas-container {
-        text-align: center;
-    }
-    </style>
-    <div id="canvas-container">
-        <canvas id="demoCanvas" width="800" height="600">
-            alternate content
-        </canvas>
-    </div>
+  #canvas-container {
+    text-align: center;
+  }
+</style>
+<div id="canvas-container">
+  <canvas id="demoCanvas" width="800" height="600">
+    alternate content
+  </canvas>
+</div>
 </body>
 </html>
